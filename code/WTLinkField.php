@@ -2,12 +2,11 @@
 
 class WTLinkField extends TextField {
 
-
-        public static $url_handlers = array(
+        private static $url_handlers = array(
                 '$Action!/$ID' => '$Action'
         );
 
-        public static $allowed_actions = array(
+        private static $allowed_actions = array(
                 'tree', 'InternalTree', 'FileTree'
         );
 
@@ -63,7 +62,7 @@ class WTLinkField extends TextField {
          * @return string
          */
         function Field($properties = array()) {
-                Requirements::javascript(LINK_FIELD_DIR . '/javascript/admin/WTLinkField.js');
+                Requirements::javascript(LINK_FIELD_DIR . '/javascript/WTLinkField.js');
                 return "<div class=\"fieldgroup\">" .
                         "<div class=\"fieldgroupField\">" . $this->fieldType->FieldHolder() . "</div>" .
                         "<div class=\"fieldgroupField\">" . $this->fieldLink->FieldHolder() . "</div>" .
@@ -400,4 +399,16 @@ class WTLink extends DBField implements CompositeDBField {
 
                 return '';
         }
+
+	public function TagWithClass() {
+		$link = $this->Link();
+
+		if ($link) {
+			$target = !empty($this->targetBlank) ? 'target="_blank"' : '';
+
+			return "<a class=\"book wd2 pie\" href=\"{$link}\" {$target}>";
+		}
+
+		return '';
+	}
 }
