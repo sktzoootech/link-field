@@ -2,7 +2,22 @@
 	"name": "sktzoootech/link-field",
 	"type": "silverstripe-module",
 	"description": "A field for adding links",
+	"license": "BSD-3-Clause",
 	"keywords": ["silverstripe", "link field"],
+        "authors": [
+                {
+                        "name": "Davis Dimalen",
+                        "email": "davis.dimalen@gmail.com",
+                        "homepage": "http://www.techrus.co.nz",
+            		"role": "Developer"
+                },
+                {
+                        "name": "Conrad Dobbs",
+                        "email": "conrad@webtorque.co.nz",
+                        "homepage": "http://www.webtorque.co.nz",
+            		"role": "Developer"
+                },                
+        ],	
 	"require":
 	{
 		"php": ">=5.3.2",
