@@ -19,7 +19,7 @@
                                 var val = $(this).attr('value');
                                 this.closest('.wtlink').find('.fieldgroupField .composite').children().each(function(){
                                         var arrToMatch = $(this).attr('id').split("_");
-                                        if (arrToMatch[1].match(val)) {
+                                        if (arrToMatch[arrToMatch.length - 2].match(val)) {
                                                 $(this).show();
                                         }
                                         else if (!$(this).hasClass('no-hide')){
