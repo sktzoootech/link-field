@@ -3,9 +3,12 @@
  * Extends Tree Dropdown Field {@Link TreeDropdownField} so it works as a subfield of another field
  * Class WTTreeDropdownField
  */
+
+use SilverStripe\Forms\TreeDropdownField;
+use SilverStripe\Control\Controller;
+
 class WTTreeDropdownField extends TreeDropdownField
 {
-
         /**
          * Return a Link to this field
          */

@@ -1,5 +1,5 @@
 {
-	"name": "sktzoootech/link-field",
+	"name": "DIA-NZ/link-field",
 	"type": "silverstripe-module",
 	"description": "A field for adding links",
 	"license": "BSD-3-Clause",
@@ -15,12 +15,17 @@
                         "email": "conrad@webtorque.co.nz",
             		"role": "Developer"
                 }                
-        ],	
+	],
+	"extra": {
+		"expose": [
+			"javascript"
+		]
+	},
 	"require":
 	{
-		"php": ">=5.3.2",
-		"silverstripe/framework": "3.*",
-		"silverstripe/cms": "3.*"
+		"php": ">=7.1",
+		"silverstripe/framework": "4.*",
+		"silverstripe/cms": "4.*"
 	},
 	"minimum-stability": "dev"
 }

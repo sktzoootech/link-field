@@ -1,5 +1,17 @@
 <?php
 
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\EmailField;
+use SilverStripe\Forms\OptionsetField;
+use SilverStripe\Forms\CompositeField;
+use SilverStripe\View\Requirements;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\ORM\FieldType\DBField;
+use SilverStripe\ORM\FieldType\DBComposite;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Assets\File;
+
 class WTLinkField extends TextField {
 
         private static $url_handlers = array(
@@ -36,10 +48,10 @@ class WTLinkField extends TextField {
                         'Internal'
                 );
                 $this->fieldLink = new CompositeField(
-                        $this->internalField = new WTTreeDropdownField("{$name}[Internal]", _t('HtmlEditorField.Internal', 'Internal'), 'SiteTree', 'ID', 'Title', true),
-                        $this->externalField = new TextField("{$name}[External]", _t('HtmlEditorField.URL', 'URL'), 'http://'),
+                        $this->internalField = new WTTreeDropdownField("{$name}[Internal]", _t('HtmlEditorField.Internal', 'Internal'), 'SilverStripe\CMS\Model\SiteTree', 'ID', 'Title', true),
+                        $this->externalField = new TextField("{$name}[External]", _t('HtmlEditorField.URL', 'External URL'), 'http://'),
                         $this->emailField = new EmailField("{$name}[Email]", _t('HtmlEditorField.EMAIL', 'Email address')),
-                        $this->fileField = new WTTreeDropdownField("{$name}[File]", _t('HtmlEditorField.FILE', 'File'), 'File', 'ID', 'Title', true),
+                        $this->fileField = new WTTreeDropdownField("{$name}[File]", _t('HtmlEditorField.FILE', 'File'), 'SilverStripe\Assets\File', 'ID', 'Title', true),
                         $this->anchorField = new TextField("{$name}[Anchor]", 'Anchor (optional)'),
                         $this->targetBlankField = new CheckboxField("{$name}[TargetBlank]", _t('HtmlEditorField.LINKOPENNEWWIN', 'Open link in a new window?'))
                 );/*new TextField("{$name}[Link]", 'Link');*/
@@ -50,11 +62,11 @@ class WTLinkField extends TextField {
                 parent::__construct($name, $title, $value);
         }
 
-        public function FileTree(SS_HTTPRequest $request) {
+        public function FileTree(HTTPRequest $request) {
                 return $this->fileField->tree($request);
         }
 
-        public function InternalTree(SS_HTTPRequest $request) {
+        public function InternalTree(HTTPRequest $request) {
                 return $this->internalField->tree($request);
         }
 
@@ -62,7 +74,7 @@ class WTLinkField extends TextField {
          * @return string
          */
         function Field($properties = array()) {
-                Requirements::javascript(LINK_FIELD_DIR . '/javascript/WTLinkField.js');
+                Requirements::javascript('resources/vendor/dia-nz/link-field/javascript/WTLinkField.js');
                 return "<div class=\"fieldgroup\">" .
                         "<div class=\"fieldgroupField\">" . $this->fieldType->FieldHolder() . "</div>" .
                         "<div class=\"fieldgroupField\">" . $this->fieldLink->FieldHolder() . "</div>" .
@@ -85,7 +97,7 @@ class WTLinkField extends TextField {
          * method.
          *
          */
-        function saveInto(DataObjectInterface $dataObject) {
+        function saveInto(\SilverStripe\ORM\DataObjectInterface $dataObject) {
                 $fieldName = $this->name;
                 if($dataObject->hasMethod("set$fieldName")) {
                         $dataObject->$fieldName = DBField::create_field('WTLink', array(
@@ -108,7 +120,7 @@ class WTLinkField extends TextField {
                 }
         }
 
-        function setValue($val) {
+        function setValue($val, $data = null) {
                 $this->value = $val;
 
                 if(is_array($val)) {
@@ -138,7 +150,7 @@ class WTLinkField extends TextField {
 }
 
 
-class WTLink extends DBField implements CompositeDBField {
+class WTLink extends DBComposite {
 
 
         /**
@@ -156,7 +168,7 @@ class WTLink extends DBField implements CompositeDBField {
         /**
          * @param array
          */
-        static $composite_db = array(
+        private static $composite_db = array(
                 "Type" => "Enum('Internal, External, Email, File', 'Internal')",
                 "Internal" => 'Int',
                 "External" => 'Varchar(255)',
@@ -189,7 +201,7 @@ class WTLink extends DBField implements CompositeDBField {
                         $this->setTargetBlank($value->getTargetBlank(), $markChanged);
 
                         if($markChanged) $this->isChanged = true;
-                } else if($record && isset($record[$this->name . 'Type'])) {
+                } else if($record && is_array($record) && isset($record[$this->name . 'Type'])) {
                         if($record[$this->name . 'Type']) {
                                 if(!empty($record[$this->name . 'Type'])) $this->setType($record[$this->name . 'Type'], $markChanged);
                                 else $this->setType('internal', $markChanged);
@@ -306,19 +318,9 @@ class WTLink extends DBField implements CompositeDBField {
          * @param string $title Optional. Localized title of the generated instance
          * @return FormField
          */
-        public function scaffoldFormField($title = null) {
+        public function scaffoldFormField($title = null, $params = null) {
                 $field = new WTLinkField($this->name);
                 return $field;
-        }
-
-        /**
-         * For backwards compatibility reasons
-         * (mainly with ecommerce module),
-         * this returns the amount value of the field,
-         * rather than a {@link Nice()} formatting.
-         */
-        function __toString() {
-                return (string)$this->getAmount();
         }
 
         function writeToManipulation(&$manipulation) {
@@ -373,7 +375,9 @@ class WTLink extends DBField implements CompositeDBField {
                 $link = '';
                 switch($this->type) {
                         case 'Internal' :
-                                if ($this->internal) $link = SiteTree::get()->byID($this->internal)->Link();
+                                if(SiteTree::get()->byID($this->internal) != NULL){
+                                    if ($this->internal) $link = SiteTree::get()->byID($this->internal)->Link();
+                                }
                                 break;
                         case 'External' :
                                 $link = $this->external;
@@ -382,7 +386,17 @@ class WTLink extends DBField implements CompositeDBField {
                                 $link = $this->email ? 'mailto:' . $this->email : '';
                                 break;
                         case 'File' :
-                                if ($this->file) $link = File::get()->byID($this->file)->Filename;
+                                if ($this->file) {
+                                        $file = File::get()->byID($this->file);
+                                        if ($file) {
+                                                if (preg_match("/^Uploads\//", $file->Filename)) {
+                                                        list($folder, $filename) = explode("/", $file->Filename);
+                                                        $link = "assets/Uploads/" . substr($file->FileHash, 0, 10) . "/" . $filename;
+                                                } else {
+                                                        $link = $file->Filename;
+                                                }
+                                        }
+                                }
                 }
 
                 return $link;

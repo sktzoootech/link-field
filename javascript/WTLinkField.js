@@ -17,9 +17,9 @@
                         },
                         toggle: function() {
                                 var val = $(this).attr('value');
-                                this.closest('.wtlink').find('.fieldgroupField .composite').children().each(function(){
-                                        var arrToMatch = $(this).attr('id').split("_");
-                                        if (arrToMatch[1].match(val)) {
+                                this.closest('.wtlink').find('.fieldgroupField .composite .form__fieldgroup').children().each(function(){
+                                        var arrToMatch = $(this).attr('id').match(/_(.*)_Holder$/u);
+                                        if (arrToMatch.length > 1 && arrToMatch[1].match(val)) {
                                                 $(this).show();
                                         }
                                         else if (!$(this).hasClass('no-hide')){
